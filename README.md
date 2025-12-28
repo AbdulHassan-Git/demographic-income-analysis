@@ -95,6 +95,6 @@ install.packages(c("tidyverse", "ggplot2", "quarto"))
 
 - Apply structured EDA techniques used in real-world analyst roles
 
-👤 Author
+## 👤 Author
 Abdul Valiyapurakkal Hassan
 📧 Abdulkhayyoom896@gmail.com | 💼 www.linkedin.com/in/abdul-khayyoom-v-h-a65865125 | 🌐 https://github.com/AbdulHassan-Git
