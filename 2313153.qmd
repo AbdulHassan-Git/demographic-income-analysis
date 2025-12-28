@@ -1,0 +1,181 @@
+---
+title: "Investigating and Analysing England Household Census Dataset 2021"
+format:
+  html:
+    code-fold: true
+    code-link: true
+    embed-resources: true
+    toc: true
+    number-sections: true
+bibliography: references.bib
+---
+
+```{r}
+#| label: loading packages
+#| include: false
+
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+library(gridExtra)
+```
+
+```{r}
+#| label: loading and cleaning the data
+#| include: false
+
+data <- read.csv("C:/Users/Shiya/Desktop/Assignment Data Science/data.csv")
+head(data)
+cleaned_data <- na.omit(data)
+```
+
+# Introduction
+
+The data under study is derived from a complete household census conducted in England in 2021, and it includes a wide range of variables, from demographic traits to socioeconomic indicators. This investigation is motivated by a desire to gain insights into the complexities of family composition, providing light on patterns that shape the lives of individuals in the examined families.
+
+To understand the distribution of each variable and the connections between them, we have generated visualizations during our initial analysis of the dataset[@giorgi2022]. This visualization chart <https://r-graph-gallery.com/ggplot2-package.html> will help to understand meaningful insight from the data set.
+
+# The Data
+
+The dataset we are examining is a modified data set collected during a household census conducted in England in 2021. It includes the following variables:
+
+1.  `ID`: Household identification number.\
+2.  `Person_ID`: Individual ID number for persons in the household.\
+3.  `Age`: Age of the individual.\
+4.  `Mar_Stat`: Marital Status of the individual.\
+5.  `INC`: Annual income of the individual in pounds.\
+6.  `Female`: A binary variable indicating whether the individual has identified as female (0 = yes).\
+7.  `H8`: A binary variable indicating the response to question H8 on the census - "Are all the rooms in this accommodation, including the kitchen, bathroom, and toilet, behind a door that only this household can use?" (1 = no, 0 = yes).
+8.  `Eth`: Ethnicity of the individual.\
+9.  `Highest Ed`: The highest level of study achieved by the individual.\
+
+# Summary
+
+The 2021 England census modified household census dataset provides a complex image of demographic and socioeconomic trends. Key discoveries occur as a result of meticulously created visualizations. The age distribution shows a fairly equal range with a tendency toward younger ages, but the marital status bar chart highlights a mostly married group. When looking into deeper associations, the age vs income scatter plot reveals a positive correlation, indicating a propensity for greater salaries as people get older. Income discrepancies between marital statuses are starkly depicted, with married people earning significantly more.\
+
+When it comes to explaining economic disparities, ethnicity takes center stage, with whites having greater median incomes than Asians and others. A line plot efficiently captures the gender distribution across age groups, establishing the framework for understanding gender dynamics at various life stages.\
+
+These visualizations give a complete view of the interaction between age, marital status, income, ethnicity, and gender in the questioned homes. The findings have implications for sociodemographic research, policy formation, and a better understanding of the many elements that influence household dynamics in England. The online resource <https://r4ds.had.co.nz/> acts as a complete study guide for R programming and data science methodologies[@r4ds].
+
+# The Interesting Thing Discovered From This Dataset
+
+We will generate some basic visualizations to better understand the distribution of the data. We'll visualize a few data sets by creating histograms for the numerical variable (`Age`), and bar plots for the categorical variable (`Mar_Stat`). This visualization is carried out using [@ggplot2], [@ggthemes], and below the graphical view and findings.
+
+## Age and Marital Status Distribution
+
+```{r}
+#| echo: false
+histogram_age <- ggplot(cleaned_data, aes(x = Age)) +
+  geom_histogram(binwidth = 2, fill = 'skyblue', color = 'black') +
+  labs(title = 'Age Distribution', x = 'Age', y = 'count')
+ggsave(filename = "histogram_age.png")
+bar_chart_marital_status <- ggplot(cleaned_data, aes(x = factor(Mar_Stat))) +
+  geom_bar(fill ="brown", color = "black") +
+  labs(title = "Distribution of Marital Status",
+       x = "Marital Status",
+       y = "Count") +
+  theme_minimal() +
+theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ggsave(filename = "bar_chart_marital_stat.png")
+grid.arrange(histogram_age, bar_chart_marital_status,ncol = 2)
+
+```
+
+From these visualizations, we can observe the following:
+
+***Age Distribution*****:** The histogram shows the age of individuals in the dataset is somewhat evenly distributed with a slight skew towards younger ages. It displays a visualization of the individuals who participated in this census, which means we can see that the age range of 25-50 adults is primarily assessed, while those over 75 are undercounted.
+
+***Marital Status Distribution:*** The bar chart shows The majority of individuals in the dataset have been married. Also, we use a grid setup[@ggridges] to keep the charts side by side.
+
+We can also explore the relationships between these variables. We can do this by creating scatter plots for numerical variables and box plots and bar charts for categorical variables against numerical variables.
+
+Specifically, we can look at:
+
+-   The relationship between Age and Income.\
+-   The distribution of Income across different Marital Statuses.\
+-   The distribution of Median Income across Ethnicities.\
+-   The distribution of Gender Distribution Across Age\
+    Let's generate these plots.
+
+## Age vs Income with a linear regression line
+
+```{r}
+#| echo: false
+suppressWarnings({
+ggplot(cleaned_data, aes(x = Age, y = INC, color = INC)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "green") +
+  scale_y_continuous(labels = scales::dollar_format(prefix = "£")) +
+  scale_color_gradient2(low = "blue", high = "red") +
+  labs(title = "Age vs. Income",
+       x = "Age",
+       y = "INC") +
+  theme_minimal()
+})
+
+ggsave(filename = "Age_vs_Income.png")
+```
+
+From this scatterplot[@nordmann2022] visualization the regression line shows a positive slope, indicating that, on average, as individuals' age increases, their annual income tends to increase as well. This positive correlation suggests that older individuals, on average, may have higher incomes compared to their younger counterparts.
+
+## Income by Marital Status
+
+```{r}
+#| echo: false
+
+ggplot(cleaned_data, aes(x = Mar_Stat, y = INC, fill = Mar_Stat)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = scales::dollar_format(prefix = "£")) +
+  labs(title = "Income Distribution by Marital Status",
+       x = "Marital Status",
+       y = "INC (GBP)",
+       fill = "Marital Status") +
+  theme_minimal()
+ggsave(filename = "Income_by_Marital.png")
+```
+
+This box plot helps to provide an improved understanding of the income gaps and patterns within the dataset by successfully communicating the distribution of annual income across marital status groups. which shows married people earn more compared to another category in the range between £400,000 & 600,000 GBP. Also, most of the people in the census earn a minimum of GBP 200,000.
+
+## Median Income across Ethnicities
+
+```{r}
+#| echo: false
+
+ggplot(cleaned_data, aes(x = Eth, y = INC, fill = Eth)) +
+  geom_bar(stat = "summary", fun = "median") +
+  scale_y_continuous(labels = scales::dollar_format(prefix = "£")) +
+  labs(title = "Median Income Across Different Ethnicities",
+       x = "Eth",
+       y = "INC (GBP)",
+       fill = "Eth") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave(filename = "Median_Inc_across_Eth.png")
+```
+
+By comparing the heights of the bars, we can quickly identify ethnic groups with higher or lower median incomes. The visualization shows whites have higher income the range above £20,000. Also, we can understand that Asian and Other Ethnicity has a lower income range of £11,000.
+
+## Gender Distribution Across Age
+
+```{r}
+#| echo: false
+ggplot(cleaned_data, aes(x = Age, color = factor(Female))) +
+  geom_line(stat = "count") +
+  labs(title = "Gender Distribution Across Age",
+       x = "Age",
+       y = "Count",
+       color = "Gender") +
+  theme_minimal()
+ggsave(filename = "Gender_across_Age.png")
+```
+
+The line plot provides a visually appealing analysis of gender dynamics, laying the groundwork for further research into the factors influencing gender composition within different age groups. Many lines in the plot represent different genders. Each line represents the number of people of a particular gender at various ages.
+
+# Conclusion
+
+In conclusion, the examination of the adjusted household census information yields significant insights into the complicated tapestry of demographic and socioeconomic elements that shape homes in England. The visualizations give insight into the distribution of age and marital status, revealing patterns that highlight the variety of the population question. The positive association between age and income suggests a complicated relationship that warrants additional examination.\
+
+Additionally, wage discrepancies between marital statuses underscore the economic ramifications of family arrangements, with married people earning more than single people. Ethnicity appears as a key predictor of income disparities, highlighting the importance of complex considerations in tackling socioeconomic inequities. The gender distribution across age groups demonstrates a dynamic interaction, laying the path for further research into the variables influencing gender dynamics at different phases of life.\
+
+These findings contribute to our understanding of society systems, laying the groundwork for focused study and informed decisions. The implications of the dataset go beyond simple statistical observations, suggesting a thorough investigation of the underlying causes impacting household dynamics. This research is a helpful resource for creating policies that address the various characteristics of age, marital status, income, race, and gender in England as we traverse the intricacies of social systems.
